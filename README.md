@@ -329,4 +329,4 @@ See [CHANGELOG.md](CHANGELOG.md) for the release history.
 
 ## License
 
-See [LICENSE](LICENSE).
+Released under the [MIT License](LICENSE).

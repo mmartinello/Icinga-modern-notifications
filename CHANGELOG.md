@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.1.0] - 2026-09-28
 
-First release, providing the mail channel.
+First release, providing the mail channel. Released under the MIT License.
 
 ### Added
 
