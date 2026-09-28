@@ -14,3 +14,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Centralised date/time and duration formatting helpers.
 - Channel-independent notification model with normalised states, display
   status (`RECOVERY` for recoveries) and a centralised status emoji mapping.
+- Complete notification options for `mail host` and `mail service`
+  (required/optional Icinga data, repeatable `--to`, numeric validation).

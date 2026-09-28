@@ -5,6 +5,8 @@ from __future__ import annotations
 import argparse
 from abc import ABC, abstractmethod
 
+from ..model import Notification
+
 
 class Channel(ABC):
     """A delivery channel such as mail (or, in the future, Teams/webhooks)."""
@@ -19,5 +21,5 @@ class Channel(ABC):
         """Add channel-specific options to a host/service sub-command parser."""
 
     @abstractmethod
-    def run(self, args: argparse.Namespace) -> None:
-        """Build and deliver the notification described by ``args``."""
+    def run(self, notification: Notification, args: argparse.Namespace) -> None:
+        """Render and deliver ``notification`` using the channel options in ``args``."""
