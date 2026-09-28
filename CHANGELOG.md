@@ -30,3 +30,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - `--dry-run` and `--dump-html`, `--dump-text`, `--dump-eml` development options.
 - Operational logging with `--verbose`, `--debug` and `--syslog`; only
   metadata is logged, never bodies, notes, comments or plugin output.
+- Example Icinga 2 `NotificationCommand` definitions and apply rules in
+  `examples/icinga2/`.
