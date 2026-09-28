@@ -23,3 +23,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   template `notification.txt.j2`.
 - Responsive, table-based HTML template `notification.html.j2` with inline
   CSS, status colours, Outlook-friendly Icinga Web button and escaped content.
+- MIME `multipart/alternative` message construction with encoded Unicode
+  headers, `Message-ID`, `Date` and `Auto-Submitted`.
