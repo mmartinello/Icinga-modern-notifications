@@ -182,6 +182,25 @@ class HtmlTemplateTests(RendererTestCase):
             with self.subTest(absent=absent):
                 self.assertNotIn(absent, html)
 
+    def test_header_omits_problem_and_recovery_labels(self):
+        for overrides in ({}, {"notification_type": "Recovery", "state": "OK"}):
+            with self.subTest(**overrides):
+                html = self.html(service(environment="PROD", **overrides))
+                self.assertNotIn("Problem", html)
+                self.assertNotIn("Recovery", html)
+                self.assertIn(">PROD</span>", html)
+
+    def test_header_shows_other_notification_types(self):
+        html = self.html(service(notification_type="Acknowledgement", environment="PROD"))
+        self.assertIn("Acknowledgement &nbsp;<span", html)
+        html = self.html(service(notification_type="DowntimeStart"))
+        self.assertIn("Downtime started", html)
+
+    def test_header_subline_absent_without_type_or_environment(self):
+        html = self.html(service())
+        self.assertNotIn("padding-top:4px;\">\n      </div>", html)
+        self.assertNotIn("padding-top:4px;\"></div>", html)
+
     def test_empty_environment_leaves_no_trace(self):
         html = self.html(service(environment=""))
         self.assertNotIn("Environment", html)

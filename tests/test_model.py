@@ -45,6 +45,8 @@ class HostNotificationTests(unittest.TestCase):
         self.assertIs(n.kind, ObjectKind.HOST)
         self.assertFalse(n.is_service)
         self.assertEqual(n.notification_type, "PROBLEM")
+        self.assertTrue(n.is_problem)
+        self.assertFalse(n.is_recovery)
         self.assertIs(n.state, State.DOWN)
         self.assertIs(n.display_status, DisplayStatus.DOWN)
         self.assertEqual(n.emoji, "🔴")
@@ -53,6 +55,7 @@ class HostNotificationTests(unittest.TestCase):
     def test_host_recovery(self):
         n = host_notification(notification_type="Recovery", state="UP")
         self.assertTrue(n.is_recovery)
+        self.assertFalse(n.is_problem)
         self.assertIs(n.state, State.UP)
         self.assertIs(n.display_status, DisplayStatus.RECOVERY)
         self.assertEqual(n.emoji, "🟢")

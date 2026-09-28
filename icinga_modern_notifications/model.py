@@ -63,7 +63,8 @@ STATUS_EMOJI: dict[DisplayStatus, str] = {
     DisplayStatus.UP: "\N{LARGE GREEN CIRCLE}",
 }
 
-#: Normalised notification type used by Icinga 2 for recoveries.
+#: Normalised notification types used by Icinga 2 for problems and recoveries.
+PROBLEM_TYPE = "PROBLEM"
 RECOVERY_TYPE = "RECOVERY"
 
 #: Human-readable labels for the notification types known to Icinga 2.
@@ -177,6 +178,11 @@ class Notification:
     def is_service(self) -> bool:
         """Whether this is a service notification."""
         return self.kind is ObjectKind.SERVICE
+
+    @property
+    def is_problem(self) -> bool:
+        """Whether this is a problem notification."""
+        return self.notification_type == PROBLEM_TYPE
 
     @property
     def is_recovery(self) -> bool:
