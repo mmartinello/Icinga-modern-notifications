@@ -16,3 +16,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   status (`RECOVERY` for recoveries) and a centralised status emoji mapping.
 - Complete notification options for `mail host` and `mail service`
   (required/optional Icinga data, repeatable `--to`, numeric validation).
+- Email subject generation (`🔴 [ICINGA][CRITICAL][PROD] host / service`).
