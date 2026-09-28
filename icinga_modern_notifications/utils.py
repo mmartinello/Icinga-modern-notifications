@@ -8,6 +8,7 @@ the machine running the application (normally the Icinga master/satellite).
 from __future__ import annotations
 
 from datetime import datetime
+from urllib.parse import urlsplit
 
 #: Default human-readable date/time format (Italian/European convention).
 DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
@@ -93,3 +94,23 @@ def parse_timestamp(value: str) -> float:
 def parse_duration(value: str) -> int:
     """Parse a duration in seconds (fractions are truncated)."""
     return int(parse_non_negative_number(value, "duration"))
+
+
+def validate_http_url(url: str) -> str:
+    """Check that ``url`` is an absolute http(s) base URL.
+
+    Returns the URL without surrounding whitespace and trailing slashes.
+
+    :raises ValueError: with an administrator-friendly message.
+    """
+    text = url.strip()
+    parts = urlsplit(text)
+    if parts.scheme.lower() not in ("http", "https") or not parts.netloc:
+        raise ValueError(
+            f"invalid URL {url!r} (expected an absolute http:// or https:// URL)"
+        )
+    if parts.query or parts.fragment or any(char.isspace() for char in text):
+        raise ValueError(
+            f"invalid URL {url!r} (query strings, fragments and spaces are not allowed)"
+        )
+    return text.rstrip("/")

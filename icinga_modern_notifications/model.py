@@ -12,6 +12,7 @@ from dataclasses import dataclass, fields
 from enum import StrEnum
 
 from .errors import ValidationError
+from .utils import validate_http_url
 
 
 class ObjectKind(StrEnum):
@@ -154,6 +155,12 @@ class Notification:
                 object.__setattr__(self, field.name, _clean(value))
         if self.environment is not None:
             object.__setattr__(self, "environment", self.environment.strip())
+        if self.icingaweb_url is not None:
+            try:
+                url = validate_http_url(self.icingaweb_url)
+            except ValueError as exc:
+                raise ValidationError(f"Icinga Web: {exc}") from None
+            object.__setattr__(self, "icingaweb_url", url)
 
         if not self.host.strip():
             raise ValidationError("host name cannot be empty")

@@ -17,3 +17,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Complete notification options for `mail host` and `mail service`
   (required/optional Icinga data, repeatable `--to`, numeric validation).
 - Email subject generation (`🔴 [ICINGA][CRITICAL][PROD] host / service`).
+- Icinga Web object links for Icinga DB Web (default) and the legacy
+  monitoring module (`--icingaweb-module`), with URL-encoded object names.

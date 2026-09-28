@@ -18,6 +18,7 @@ from pathlib import Path
 from . import PROJECT_NAME, __version__
 from .channels import available_channels
 from .errors import ExitCode, NotificationError
+from .icingaweb import DEFAULT_MODULE, ROUTES
 from .model import Notification, ObjectKind, VALID_STATES
 from .utils import parse_duration, parse_timestamp
 
@@ -98,6 +99,12 @@ def add_notification_arguments(
     )
     optional.add_argument(
         "--icingaweb-url", metavar="URL", help="base URL of Icinga Web"
+    )
+    optional.add_argument(
+        "--icingaweb-module",
+        choices=sorted(ROUTES),
+        default=DEFAULT_MODULE,
+        help="Icinga Web module used to build object links (default: %(default)s)",
     )
     optional.add_argument(
         "--timestamp",
