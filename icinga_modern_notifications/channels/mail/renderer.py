@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import jinja2
+from markupsafe import Markup, escape
 
 from ... import PROJECT_NAME, __version__
 from ...errors import TemplateError
@@ -25,6 +26,12 @@ from ...utils import format_duration, format_timestamp
 
 TEXT_TEMPLATE = "notification.txt.j2"
 HTML_TEMPLATE = "notification.html.j2"
+
+
+def nl2br(value: object) -> Markup:
+    """Escape ``value`` and turn line breaks into ``<br>`` (HTML templates only)."""
+    lines = str(value).replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    return Markup("<br>\n").join(escape(line) for line in lines)
 
 
 @dataclass(frozen=True)
@@ -60,6 +67,8 @@ class MailRenderer:
         )
         env.filters["datetime"] = format_timestamp
         env.filters["duration"] = format_duration
+        if autoescape:
+            env.filters["nl2br"] = nl2br
         return env
 
     def _render(
@@ -97,3 +106,14 @@ class MailRenderer:
     def render_html(self, context: dict[str, object]) -> str:
         """Render the HTML body."""
         return self._render(self._html_env, HTML_TEMPLATE, context)
+
+    def render(
+        self, notification: Notification, subject: str, icingaweb_link: str | None
+    ) -> RenderedMail:
+        """Render both bodies; nothing is returned unless both succeed."""
+        context = self.context(notification, subject, icingaweb_link)
+        return RenderedMail(
+            subject=subject,
+            text=self.render_text(context),
+            html=self.render_html(context),
+        )

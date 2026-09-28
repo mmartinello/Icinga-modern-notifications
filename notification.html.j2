@@ -1,0 +1,205 @@
+{#-
+  HTML mail body for Icinga Modern Notifications.
+
+  Variables: n (Notification), subject, icingaweb_link, project_name, version.
+  Optional values are None when absent: wrap every optional block in an
+  {% if %} so that nothing (labels, separators, spacing) is left behind.
+
+  Autoescaping is enabled: never mark notification data as |safe. Use the
+  |nl2br filter to keep line breaks of multi-line values; it escapes first.
+
+  Layout: table-based, single column, max 600px, inline CSS for maximum
+  email client compatibility (including Outlook).
+-#}
+{%- set palette = {
+    "CRITICAL": {"accent": "#c62828", "tint": "#fdecea"},
+    "DOWN":     {"accent": "#c62828", "tint": "#fdecea"},
+    "WARNING":  {"accent": "#e65100", "tint": "#fff3e0"},
+    "UNKNOWN":  {"accent": "#6a1b9a", "tint": "#f3e5f5"},
+    "RECOVERY": {"accent": "#2e7d32", "tint": "#e8f5e9"},
+    "OK":       {"accent": "#2e7d32", "tint": "#e8f5e9"},
+    "UP":       {"accent": "#2e7d32", "tint": "#e8f5e9"},
+} -%}
+{%- set color = palette.get(n.display_status.value, {"accent": "#455a64", "tint": "#eceff1"}) -%}
+{%- set font = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" | safe -%}
+{%- set mono = "SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace" | safe -%}
+
+{%- macro row(label, value) -%}
+<tr>
+  <td class="label" valign="top" style="padding:6px 12px 6px 0; width:120px; font-family:{{ font }}; font-size:14px; line-height:20px; color:#6b7280;">{{ label }}</td>
+  <td valign="top" style="padding:6px 0; font-family:{{ font }}; font-size:14px; line-height:20px; color:#111827; word-break:break-word;">{{ value }}</td>
+</tr>
+{%- endmacro -%}
+
+{%- macro section(title) -%}
+<tr>
+  <td class="px" style="padding:0 32px 24px 32px;">
+    <div style="font-family:{{ font }}; font-size:12px; line-height:16px; font-weight:bold; letter-spacing:1px; text-transform:uppercase; color:#6b7280; padding-bottom:8px;">{{ title }}</div>
+    <div style="font-family:{{ font }}; font-size:15px; line-height:22px; color:#111827; word-break:break-word;">{{ caller() }}</div>
+  </td>
+</tr>
+{%- endmacro -%}
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>{{ subject }}</title>
+<style>
+  body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+  table { border-collapse: collapse; }
+  a { color: {{ color.accent }}; }
+  @media only screen and (max-width: 620px) {
+    .container { width: 100% !important; }
+    .outer { padding: 0 !important; }
+    .px { padding-left: 20px !important; padding-right: 20px !important; }
+    .status { font-size: 24px !important; line-height: 30px !important; }
+    .title { font-size: 20px !important; line-height: 26px !important; }
+    .label { width: 100px !important; }
+    .button a { display: block !important; }
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#f3f4f6;">
+<div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#f3f4f6;">{{ n.display_status.value }} - {{ n.object_name }}: {{ n.output | truncate(140) }}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f4f6;">
+<tr>
+<td class="outer" align="center" style="padding:24px 12px;">
+<!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+<table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; background-color:#ffffff; border-radius:8px; overflow:hidden;">
+
+  {#- 1. State/event header -#}
+  <tr>
+    <td class="px" bgcolor="{{ color.accent }}" style="background-color:{{ color.accent }}; padding:24px 32px;">
+      <div class="status" style="font-family:{{ font }}; font-size:28px; line-height:34px; font-weight:bold; color:#ffffff;">{{ n.emoji }} {{ n.display_status.value }}</div>
+      {%- if not n.is_recovery or n.environment %}
+      <div style="font-family:{{ font }}; font-size:14px; line-height:20px; color:#ffffff; padding-top:4px;">
+        {%- if not n.is_recovery %}{{ n.notification_type_label }}{% if n.environment %} &nbsp;{% endif %}{% endif -%}
+        {%- if n.environment %}<span style="display:inline-block; padding:2px 8px; border:1px solid #ffffff; border-radius:4px; font-weight:bold; font-size:12px; letter-spacing:1px;">{{ n.environment }}</span>{% endif -%}
+      </div>
+      {%- endif %}
+    </td>
+  </tr>
+
+  {#- 2. Host/service identity -#}
+  <tr>
+    <td class="px" style="padding:24px 32px 16px 32px;">
+      {%- if n.is_service %}
+      <div class="title" style="font-family:{{ font }}; font-size:22px; line-height:28px; font-weight:bold; color:#111827; word-break:break-word;">{{ n.service_title }}</div>
+      <div style="font-family:{{ font }}; font-size:15px; line-height:22px; color:#4b5563; padding-top:2px; word-break:break-word;">on {{ n.host_title }}</div>
+      {%- else %}
+      <div class="title" style="font-family:{{ font }}; font-size:22px; line-height:28px; font-weight:bold; color:#111827; word-break:break-word;">{{ n.host_title }}</div>
+      {%- endif %}
+    </td>
+  </tr>
+
+  {#- 3. Primary plugin output -#}
+  <tr>
+    <td class="px" style="padding:0 32px 24px 32px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td bgcolor="{{ color.tint }}" style="background-color:{{ color.tint }}; border-left:4px solid {{ color.accent }}; padding:14px 16px; font-family:{{ mono }}; font-size:14px; line-height:21px; color:#111827; word-break:break-word;">{{ n.output | nl2br }}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  {#- 4. Essential details -#}
+  <tr>
+    <td class="px" style="padding:0 32px 24px 32px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb;">
+        <tr><td colspan="2" style="height:8px; line-height:8px; font-size:8px;">&nbsp;</td></tr>
+        {%- if n.host_display_name and n.host_display_name != n.host %}
+        {{ row("Host", n.host_display_name ~ " (" ~ n.host ~ ")") }}
+        {%- else %}
+        {{ row("Host", n.host) }}
+        {%- endif %}
+        {%- if n.is_service %}
+        {%- if n.service_display_name and n.service_display_name != n.service %}
+        {{ row("Service", n.service_display_name ~ " (" ~ n.service ~ ")") }}
+        {%- else %}
+        {{ row("Service", n.service) }}
+        {%- endif %}
+        {%- endif %}
+        {%- if n.environment %}
+        {{ row("Environment", n.environment) }}
+        {%- endif %}
+        {{ row("State", n.state.value) }}
+        {%- if n.address %}
+        {{ row("Address", n.address) }}
+        {%- endif %}
+        {%- if n.address6 %}
+        {{ row("IPv6 address", n.address6) }}
+        {%- endif %}
+        {{ row("Since", n.timestamp | datetime) }}
+        {%- if n.duration is not none %}
+        {{ row("Duration", n.duration | duration) }}
+        {%- endif %}
+        <tr><td colspan="2" style="height:8px; line-height:8px; font-size:8px;">&nbsp;</td></tr>
+      </table>
+    </td>
+  </tr>
+
+  {#- 5. Long output -#}
+  {%- if n.long_output %}
+  <tr>
+    <td class="px" style="padding:0 32px 24px 32px;">
+      <div style="font-family:{{ font }}; font-size:12px; line-height:16px; font-weight:bold; letter-spacing:1px; text-transform:uppercase; color:#6b7280; padding-bottom:8px;">Additional output</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td bgcolor="#f9fafb" style="background-color:#f9fafb; border:1px solid #e5e7eb; padding:12px 14px; font-family:{{ mono }}; font-size:13px; line-height:19px; color:#374151; word-break:break-word;">{{ n.long_output | nl2br }}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  {%- endif %}
+
+  {#- 6. Notes -#}
+  {%- if n.notes %}
+  {% call section("Notes") %}{{ n.notes | nl2br }}{% endcall %}
+  {%- endif %}
+
+  {#- 7. Author/comment -#}
+  {%- if n.comment %}
+  {% call section("Comment") %}
+    {%- if n.author %}<strong>{{ n.author }}</strong><br>{% endif -%}
+    {{ n.comment | nl2br }}
+  {%- endcall %}
+  {%- elif n.author %}
+  {% call section("Author") %}{{ n.author }}{% endcall %}
+  {%- endif %}
+
+  {#- 8. Icinga Web action -#}
+  {%- if icingaweb_link %}
+  <tr>
+    <td class="px button" align="center" style="padding:8px 32px 32px 32px;">
+      <!--[if mso]>
+      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ icingaweb_link }}" style="height:48px; v-text-anchor:middle; width:280px;" arcsize="10%" stroke="f" fillcolor="{{ color.accent }}">
+        <w:anchorlock/>
+        <center style="color:#ffffff; font-family:Arial, sans-serif; font-size:16px; font-weight:bold;">Open in Icinga Web</center>
+      </v:roundrect>
+      <![endif]-->
+      <!--[if !mso]><!-->
+      <a href="{{ icingaweb_link }}" target="_blank" rel="noopener" style="display:inline-block; min-width:240px; padding:14px 28px; background-color:{{ color.accent }}; border-radius:6px; font-family:{{ font }}; font-size:16px; line-height:20px; font-weight:bold; color:#ffffff; text-align:center; text-decoration:none;">Open in Icinga Web</a>
+      <!--<![endif]-->
+    </td>
+  </tr>
+  {%- endif %}
+
+</table>
+<!--[if mso]></td></tr></table><![endif]-->
+
+{#- 9. Footer -#}
+<table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;">
+  <tr>
+    <td align="center" style="padding:16px 12px; font-family:{{ font }}; font-size:12px; line-height:16px; color:#9ca3af;">Sent by {{ project_name }}</td>
+  </tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>

@@ -21,3 +21,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   monitoring module (`--icingaweb-module`), with URL-encoded object names.
 - Jinja2 mail renderer with clear template errors and the plain-text
   template `notification.txt.j2`.
+- Responsive, table-based HTML template `notification.html.j2` with inline
+  CSS, status colours, Outlook-friendly Icinga Web button and escaped content.
