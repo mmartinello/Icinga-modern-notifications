@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-28
+
+First release, providing the mail channel.
+
 ### Added
 
 - Project skeleton: launcher script, `icinga_modern_notifications` package,
@@ -32,3 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   metadata is logged, never bodies, notes, comments or plugin output.
 - Example Icinga 2 `NotificationCommand` definitions and apply rules in
   `examples/icinga2/`.
+- Complete README (installation, usage, templates, Icinga integration,
+  exit codes, troubleshooting, security).
+
+[Unreleased]: https://github.com/mmartinello/Icinga-modern-notifications/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/mmartinello/Icinga-modern-notifications/releases/tag/v0.1.0
