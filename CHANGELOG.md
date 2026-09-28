@@ -12,3 +12,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Project skeleton: launcher script, `icinga_modern_notifications` package,
   channel-oriented command line (`mail host`, `mail service`) and exit codes.
 - Centralised date/time and duration formatting helpers.
+- Channel-independent notification model with normalised states, display
+  status (`RECOVERY` for recoveries) and a centralised status emoji mapping.
