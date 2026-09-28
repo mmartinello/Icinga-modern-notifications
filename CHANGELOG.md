@@ -25,3 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   CSS, status colours, Outlook-friendly Icinga Web button and escaped content.
 - MIME `multipart/alternative` message construction with encoded Unicode
   headers, `Message-ID`, `Date` and `Auto-Submitted`.
+- Delivery through the local sendmail-compatible MTA (`--sendmail-path`),
+  executed without a shell, and configurable `--template-dir`.
