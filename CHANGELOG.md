@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Example emails for every status (`examples/emails/`, regenerated with
+  `examples/render_examples.py`) and PNG screenshots in `screenshots/`.
+
 ## [0.1.0] - 2026-09-28
 
 First release, providing the mail channel. Released under the MIT License.

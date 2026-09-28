@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>🟠 [ICINGA][WARNING][PROD] postgres01 / disk-var</title>
+<style>
+  body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+  table { border-collapse: collapse; }
+  a { color: #e65100; }
+  @media only screen and (max-width: 620px) {
+    .container { width: 100% !important; }
+    .outer { padding: 0 !important; }
+    .px { padding-left: 20px !important; padding-right: 20px !important; }
+    .status { font-size: 24px !important; line-height: 30px !important; }
+    .title { font-size: 20px !important; line-height: 26px !important; }
+    .label { width: 100px !important; }
+    .button a { display: block !important; }
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#f3f4f6;">
+<div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#f3f4f6;">WARNING - postgres01 / disk-var: DISK WARNING - free space: /var 4096 MB (8.2% inode=91%)</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f3f4f6;">
+<tr>
+<td class="outer" align="center" style="padding:24px 12px;">
+<!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+<table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; background-color:#ffffff; border-radius:8px; overflow:hidden;"><tr>
+    <td class="px" bgcolor="#e65100" style="background-color:#e65100; padding:24px 32px;">
+      <div class="status" style="font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:28px; line-height:34px; font-weight:bold; color:#ffffff;">🟠 WARNING</div>      <div style="font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#ffffff; padding-top:4px;">Problem &nbsp;<span style="display:inline-block; padding:2px 8px; border:1px solid #ffffff; border-radius:4px; font-weight:bold; font-size:12px; letter-spacing:1px;">PROD</span></div>    </td>
+  </tr><tr>
+    <td class="px" style="padding:24px 32px 16px 32px;">      <div class="title" style="font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:22px; line-height:28px; font-weight:bold; color:#111827; word-break:break-word;">Disk /var</div>
+      <div style="font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:15px; line-height:22px; color:#4b5563; padding-top:2px; word-break:break-word;">on PostgreSQL primary</div>    </td>
+  </tr><tr>
+    <td class="px" style="padding:0 32px 24px 32px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td bgcolor="#fff3e0" style="background-color:#fff3e0; border-left:4px solid #e65100; padding:14px 16px; font-family:SFMono-Regular, Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size:14px; line-height:21px; color:#111827; word-break:break-word;">DISK WARNING - free space: /var 4096 MB (8.2% inode=91%)</td>
+        </tr>
+      </table>
+    </td>
+  </tr><tr>
+    <td class="px" style="padding:0 32px 24px 32px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #e5e7eb; border-bottom:1px solid #e5e7eb;">
+        <tr><td colspan="2" style="height:8px; line-height:8px; font-size:8px;">&nbsp;</td></tr>        <tr>
+  <td class="label" valign="top" style="padding:6px 12px 6px 0; width:120px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#6b7280;">Host</td>
+  <td valign="top" style="padding:6px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#111827; word-break:break-word;">PostgreSQL primary (postgres01)</td>
+</tr>        <tr>
+  <td class="label" valign="top" style="padding:6px 12px 6px 0; width:120px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#6b7280;">Service</td>
+  <td valign="top" style="padding:6px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#111827; word-break:break-word;">Disk /var (disk-var)</td>
+</tr>        <tr>
+  <td class="label" valign="top" style="padding:6px 12px 6px 0; width:120px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#6b7280;">Environment</td>
+  <td valign="top" style="padding:6px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#111827; word-break:break-word;">PROD</td>
+</tr>        <tr>
+  <td class="label" valign="top" style="padding:6px 12px 6px 0; width:120px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#6b7280;">State</td>
+  <td valign="top" style="padding:6px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#111827; word-break:break-word;">WARNING</td>
+</tr>        <tr>
+  <td class="label" valign="top" style="padding:6px 12px 6px 0; width:120px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#6b7280;">Address</td>
+  <td valign="top" style="padding:6px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#111827; word-break:break-word;">10.0.10.21</td>
+</tr>        <tr>
+  <td class="label" valign="top" style="padding:6px 12px 6px 0; width:120px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#6b7280;">Since</td>
+  <td valign="top" style="padding:6px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#111827; word-break:break-word;">28/09/2026 15:52:31</td>
+</tr>        <tr>
+  <td class="label" valign="top" style="padding:6px 12px 6px 0; width:120px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#6b7280;">Duration</td>
+  <td valign="top" style="padding:6px 0; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:20px; color:#111827; word-break:break-word;">45m 10s</td>
+</tr>        <tr><td colspan="2" style="height:8px; line-height:8px; font-size:8px;">&nbsp;</td></tr>
+      </table>
+    </td>
+  </tr>  <tr>
+    <td class="px button" align="center" style="padding:8px 32px 32px 32px;">
+      <!--[if mso]>
+      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://monitoring.example.com/icingaweb2/icingadb/service?name=disk-var&amp;host.name=postgres01" style="height:48px; v-text-anchor:middle; width:280px;" arcsize="10%" stroke="f" fillcolor="#e65100">
+        <w:anchorlock/>
+        <center style="color:#ffffff; font-family:Arial, sans-serif; font-size:16px; font-weight:bold;">Open in Icinga Web</center>
+      </v:roundrect>
+      <![endif]-->
+      <!--[if !mso]><!-->
+      <a href="https://monitoring.example.com/icingaweb2/icingadb/service?name=disk-var&amp;host.name=postgres01" target="_blank" rel="noopener" style="display:inline-block; min-width:240px; padding:14px 28px; background-color:#e65100; border-radius:6px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:16px; line-height:20px; font-weight:bold; color:#ffffff; text-align:center; text-decoration:none;">Open in Icinga Web</a>
+      <!--<![endif]-->
+    </td>
+  </tr>
+</table>
+<!--[if mso]></td></tr></table><![endif]--><table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px;">
+  <tr>
+    <td align="center" style="padding:16px 12px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:12px; line-height:16px; color:#9ca3af;">Sent by Icinga Modern Notifications</td>
+  </tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>

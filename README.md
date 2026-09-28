@@ -18,6 +18,25 @@ notification model and delivers a clean, readable message:
 > **Note:** the project is designed to support multiple notification channels
 > over time. **Currently only email is supported.**
 
+## Screenshots
+
+| Service CRITICAL | Service WARNING | Service RECOVERY |
+| --- | --- | --- |
+| ![Service CRITICAL](screenshots/service-critical.png) | ![Service WARNING](screenshots/service-warning.png) | ![Service RECOVERY](screenshots/service-recovery.png) |
+
+| Host DOWN | Service UNKNOWN | Mobile |
+| --- | --- | --- |
+| ![Host DOWN](screenshots/host-down.png) | ![Service UNKNOWN](screenshots/service-unknown.png) | ![Service CRITICAL on mobile](screenshots/service-critical-mobile.png) |
+
+All screenshots are in [`screenshots/`](screenshots/), including host
+recovery, acknowledgement and a notification without optional data. The
+matching HTML files are in [`examples/emails/`](examples/emails/) and can be
+regenerated with the current templates:
+
+```bash
+python3 examples/render_examples.py
+```
+
 ## Supported software
 
 - **Icinga 2** (any version able to run a `NotificationCommand`).
