@@ -27,3 +27,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   headers, `Message-ID`, `Date` and `Auto-Submitted`.
 - Delivery through the local sendmail-compatible MTA (`--sendmail-path`),
   executed without a shell, and configurable `--template-dir`.
+- `--dry-run` and `--dump-html`, `--dump-text`, `--dump-eml` development options.

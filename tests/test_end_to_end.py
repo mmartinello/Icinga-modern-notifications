@@ -109,6 +109,67 @@ class EndToEndTests(FakeSendmailTestCase):
         self.assertFalse(self.out.exists())
 
 
+class DryRunTests(FakeSendmailTestCase):
+    def test_dry_run_prints_message_and_never_sends(self):
+        from unittest import mock
+
+        with mock.patch("subprocess.run") as run:
+            code, out, err = run_cli(*SERVICE_ARGS, "--dry-run", "--sendmail-path", str(self.sendmail))
+        self.assertEqual(code, 0, err)
+        run.assert_not_called()
+        self.assertFalse(self.out.exists())
+        msg = email.message_from_string(out, policy=policy.default)
+        self.assertEqual(msg.get_content_type(), "multipart/alternative")
+        self.assertEqual(msg["Subject"], "🔴 [ICINGA][CRITICAL] postgres01 / PostgreSQL")
+
+    def test_dry_run_with_missing_sendmail(self):
+        code, out, _ = run_cli(*SERVICE_ARGS, "--dry-run", "--sendmail-path", "/nonexistent")
+        self.assertEqual(code, 0)
+        self.assertIn("multipart/alternative", out)
+
+    def test_dumps_with_dry_run(self):
+        html, text, eml = self.tmp / "n.html", self.tmp / "n.txt", self.tmp / "n.eml"
+        code, out, err = run_cli(
+            *SERVICE_ARGS,
+            "--dry-run",
+            "--sendmail-path", str(self.sendmail),
+            "--dump-html", str(html),
+            "--dump-text", str(text),
+            "--dump-eml", str(eml),
+        )
+        self.assertEqual((code, out, err), (0, "", ""))
+        self.assertFalse(self.out.exists())
+        self.assertTrue(html.read_text().startswith("<!DOCTYPE html>"))
+        self.assertTrue(text.read_text().startswith("🔴 CRITICAL"))
+        msg = email.message_from_bytes(eml.read_bytes(), policy=policy.default)
+        self.assertEqual(
+            [p.get_content_type() for p in msg.iter_parts()], ["text/plain", "text/html"]
+        )
+
+    def test_dump_without_dry_run_also_sends(self):
+        eml = self.tmp / "n.eml"
+        code, _, _ = run_cli(
+            *SERVICE_ARGS, "--sendmail-path", str(self.sendmail), "--dump-eml", str(eml)
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(eml.read_bytes(), self.out.read_bytes())
+
+    def test_unwritable_dump_sends_nothing(self):
+        code, _, err = run_cli(
+            *SERVICE_ARGS,
+            "--sendmail-path", str(self.sendmail),
+            "--dump-html", str(self.tmp / "missing-dir" / "n.html"),
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("cannot write", err)
+        self.assertFalse(self.out.exists())
+
+    def test_dry_run_still_validates_and_renders(self):
+        code, out, _ = run_cli(*SERVICE_ARGS, "--dry-run", "--template-dir", str(self.tmp))
+        self.assertEqual(code, 3)
+        self.assertEqual(out, "")
+
+
 class LauncherTests(FakeSendmailTestCase):
     def test_launcher_uses_its_own_directory_for_templates(self):
         """Run the installed layout from an unrelated working directory."""
