@@ -10,7 +10,6 @@ describing the Icinga object are shared by every channel.
 from __future__ import annotations
 
 import argparse
-import sys
 import time
 from collections.abc import Callable, Sequence
 from pathlib import Path
@@ -19,6 +18,7 @@ from . import PROJECT_NAME, __version__
 from .channels import available_channels
 from .errors import ExitCode, NotificationError
 from .icingaweb import DEFAULT_MODULE, ROUTES
+from .log import add_logging_arguments, configure_logging
 from .model import Notification, ObjectKind, VALID_STATES
 from .utils import parse_duration, parse_timestamp
 
@@ -147,6 +147,7 @@ def build_parser(template_dir: Path | None = None) -> argparse.ArgumentParser:
             )
             add_notification_arguments(kind_parser, kind)
             channel.add_arguments(kind_parser)
+            add_logging_arguments(kind_parser)
             kind_parser.set_defaults(channel_impl=channel, kind=kind)
 
     return parser
@@ -182,18 +183,29 @@ def main(
     """Run the application and return the process exit code."""
     parser = build_parser(default_template_dir)
     args = parser.parse_args(argv)
+    logger = configure_logging(
+        verbose=args.verbose, debug=args.debug, syslog=args.syslog
+    )
 
     try:
         notification = notification_from_args(args)
+        logger.debug(
+            "%s notification: type=%s state=%s object=%r",
+            notification.kind,
+            notification.notification_type,
+            notification.state,
+            notification.object_name,
+        )
         args.channel_impl.run(notification, args)
     except NotificationError as exc:
-        print(f"{PROG}: error: {exc}", file=sys.stderr)
+        logger.error("%s", exc)
         return int(exc.exit_code)
     except KeyboardInterrupt:
-        print(f"{PROG}: interrupted", file=sys.stderr)
+        logger.error("interrupted")
         return int(ExitCode.RUNTIME_ERROR)
     except Exception as exc:  # noqa: BLE001 - last-resort safety net
-        print(f"{PROG}: unexpected error: {exc}", file=sys.stderr)
+        logger.error("unexpected error: %s: %s", type(exc).__name__, exc)
+        logger.debug("traceback of the unexpected error", exc_info=True)
         return int(ExitCode.RUNTIME_ERROR)
 
     return int(ExitCode.SUCCESS)

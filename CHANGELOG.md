@@ -28,3 +28,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Delivery through the local sendmail-compatible MTA (`--sendmail-path`),
   executed without a shell, and configurable `--template-dir`.
 - `--dry-run` and `--dump-html`, `--dump-text`, `--dump-eml` development options.
+- Operational logging with `--verbose`, `--debug` and `--syslog`; only
+  metadata is logged, never bodies, notes, comments or plugin output.

@@ -8,6 +8,7 @@ from pathlib import Path
 
 from ...errors import NotificationError
 from ...icingaweb import object_url
+from ...log import get_logger
 from ...model import Notification
 from ..base import Channel
 from .config import MailSettings
@@ -15,6 +16,8 @@ from .message import build_message, message_bytes
 from .renderer import MailRenderer
 from .subject import build_subject
 from .transport import DEFAULT_SENDMAIL_PATH, SendmailTransport
+
+log = get_logger("mail")
 
 
 class MailChannel(Channel):
@@ -89,11 +92,19 @@ class MailChannel(Channel):
         Nothing is sent unless validation and rendering of both parts succeed.
         """
         settings = self.settings(args)
-        renderer = MailRenderer(args.template_dir or args.default_template_dir)
+        template_dir = args.template_dir or args.default_template_dir
+        log.debug("using template directory %s", template_dir)
+        renderer = MailRenderer(template_dir)
         subject = build_subject(notification)
         link = object_url(notification, args.icingaweb_module)
         rendered = renderer.render(notification, subject, link)
         raw = message_bytes(build_message(rendered, settings))
+        log.debug(
+            "rendered message: text=%d chars, html=%d chars, mime=%d bytes",
+            len(rendered.text),
+            len(rendered.html),
+            len(raw),
+        )
 
         dumps = {
             args.dump_html: rendered.html.encode("utf-8"),
@@ -103,13 +114,21 @@ class MailChannel(Channel):
         for path, content in dumps.items():
             if path is not None:
                 write_file(path, content)
+                log.info("wrote %s", path)
 
+        summary = (
+            f"{notification.display_status} notification for "
+            f"{notification.object_name!r} to {len(settings.recipients)} recipient(s)"
+        )
         if args.dry_run:
+            log.info("dry run: not sending %s", summary)
             if not any(path is not None for path in dumps):
                 write_stdout(raw)
             return
 
+        log.debug("delivering through %s", args.sendmail_path)
         SendmailTransport(args.sendmail_path).send(raw, settings.recipients)
+        log.info("sent %s", summary)
 
 
 def write_file(path: Path, content: bytes) -> None:
