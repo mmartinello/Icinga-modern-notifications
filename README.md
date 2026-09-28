@@ -15,14 +15,27 @@ notification model and delivers a clean, readable message:
 - presentation lives in Jinja2 templates that can be customised without
   touching Python code.
 
-## Supported software and channels
+> **Note:** the project is designed to support multiple notification channels
+> over time. **Currently only email is supported.**
+
+## Supported software
 
 - **Icinga 2** (any version able to run a `NotificationCommand`).
-- **Channel: mail** - delivered through the local sendmail-compatible MTA.
 
-The architecture separates the notification model from the delivery channels
-so that more channels can be added in the future without redesigning the
-core. Only the mail channel is implemented at the moment.
+## Notification channels
+
+| Channel | Status | Command |
+| --- | --- | --- |
+| Mail | supported | `icinga-modern-notifications mail host\|service` |
+
+Icinga Modern Notifications is built to be extensible. The Icinga data is
+normalised into a channel-independent notification model, and each channel
+only takes care of rendering and delivering it. The command line follows the
+same structure (`icinga-modern-notifications <channel> <host|service>`), so
+new channels, such as chat or webhook integrations, can be added later
+without changing the core model or the options shared by all channels.
+
+No channel other than mail is implemented at the moment.
 
 ## Requirements
 
