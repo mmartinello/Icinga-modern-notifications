@@ -19,3 +19,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Email subject generation (`🔴 [ICINGA][CRITICAL][PROD] host / service`).
 - Icinga Web object links for Icinga DB Web (default) and the legacy
   monitoring module (`--icingaweb-module`), with URL-encoded object names.
+- Jinja2 mail renderer with clear template errors and the plain-text
+  template `notification.txt.j2`.

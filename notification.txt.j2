@@ -1,0 +1,68 @@
+{#- Plain-text mail body. Variables: n (Notification), subject, icingaweb_link,
+    project_name, version. Optional values are None when absent. -#}
+{{ n.emoji }} {{ n.display_status }}{{ " [" ~ n.environment ~ "]" if n.environment else "" }}
+
+{% if n.is_service %}
+{{ n.service_title }} on {{ n.host_title }}
+{% else %}
+{{ n.host_title }}
+{% endif %}
+
+Output:
+{{ n.output }}
+
+Notification: {{ n.notification_type_label }}
+{% if n.host_display_name and n.host_display_name != n.host %}
+Host: {{ n.host_display_name }} ({{ n.host }})
+{% else %}
+Host: {{ n.host }}
+{% endif %}
+{% if n.is_service %}
+{% if n.service_display_name and n.service_display_name != n.service %}
+Service: {{ n.service_display_name }} ({{ n.service }})
+{% else %}
+Service: {{ n.service }}
+{% endif %}
+{% endif %}
+{% if n.environment %}
+Environment: {{ n.environment }}
+{% endif %}
+State: {{ n.state }}
+{% if n.address %}
+Address: {{ n.address }}
+{% endif %}
+{% if n.address6 %}
+IPv6 address: {{ n.address6 }}
+{% endif %}
+Since: {{ n.timestamp | datetime }}
+{% if n.duration is not none %}
+Duration: {{ n.duration | duration }}
+{% endif %}
+{% if n.long_output %}
+
+Additional output:
+{{ n.long_output }}
+{% endif %}
+{% if n.notes %}
+
+Notes:
+{{ n.notes }}
+{% endif %}
+{% if n.author or n.comment %}
+
+{% if n.author %}
+Author: {{ n.author }}
+{% endif %}
+{% if n.comment %}
+Comment:
+{{ n.comment }}
+{% endif %}
+{% endif %}
+{% if icingaweb_link %}
+
+Icinga Web:
+{{ icingaweb_link }}
+{% endif %}
+
+-- 
+{{ project_name }}
