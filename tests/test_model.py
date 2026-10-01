@@ -9,6 +9,7 @@ from icinga_modern_notifications.model import (
     ObjectKind,
     State,
     STATUS_EMOJI,
+    Tag,
 )
 
 
@@ -181,6 +182,41 @@ class OptionalFieldsTests(unittest.TestCase):
         ):
             with self.subTest(field=name):
                 self.assertIsNone(getattr(n, name))
+
+
+class TagTests(unittest.TestCase):
+    def test_no_tags_by_default(self):
+        self.assertEqual(service_notification().tags, ())
+
+    def test_tags_preserve_order(self):
+        tags = [Tag("Location", "DC Milano"), Tag("Team", "DBA"), Tag("Customer", "ACME")]
+        n = service_notification(tags=tags)
+        self.assertEqual(n.tags, tuple(tags))
+        self.assertIsInstance(n.tags, tuple)
+
+    def test_tags_are_unlimited(self):
+        tags = [Tag(f"Label {i}", f"value {i}") for i in range(100)]
+        self.assertEqual(len(service_notification(tags=tags).tags), 100)
+
+    def test_empty_values_are_dropped(self):
+        n = service_notification(tags=[Tag("Location", ""), Tag("Team", "  "), Tag("Rack", "B4")])
+        self.assertEqual(n.tags, (Tag("Rack", "B4"),))
+
+    def test_exact_duplicates_are_dropped(self):
+        n = service_notification(
+            tags=[Tag("Team", "DBA"), Tag("Location", "DC"), Tag("Team", "DBA"), Tag("Team", "NOC")]
+        )
+        self.assertEqual(
+            n.tags, (Tag("Team", "DBA"), Tag("Location", "DC"), Tag("Team", "NOC"))
+        )
+
+    def test_whitespace_is_collapsed(self):
+        tag = Tag("  Data\tcenter ", " DC\r\n Milano  ")
+        self.assertEqual(tag, Tag("Data center", "DC Milano"))
+
+    def test_empty_label_is_rejected(self):
+        with self.assertRaises(ValidationError):
+            Tag(" ", "value")
 
 
 class EmojiMappingTests(unittest.TestCase):

@@ -8,6 +8,7 @@ HTML or any other delivery-specific concept.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, fields
 from enum import StrEnum
 
@@ -110,6 +111,31 @@ def _clean(value: str | None) -> str | None:
     return value if value.strip() else None
 
 
+@dataclass(frozen=True)
+class Tag:
+    """A free-form label/value pair describing the notified object.
+
+    Tags carry site-specific information (location, team, customer...) chosen
+    in the Icinga configuration. Whitespace is collapsed so that tags always
+    render on a single line.
+    """
+
+    label: str
+    value: str
+
+    def __post_init__(self) -> None:
+        label = " ".join(str(self.label).split())
+        if not label:
+            raise ValidationError("tag label cannot be empty")
+        object.__setattr__(self, "label", label)
+        object.__setattr__(self, "value", " ".join(str(self.value).split()))
+
+
+def normalize_tags(tags: Iterable[Tag]) -> tuple[Tag, ...]:
+    """Drop tags without a value and exact duplicates, preserving order."""
+    return tuple(dict.fromkeys(tag for tag in tags if tag.value))
+
+
 @dataclass(frozen=True, kw_only=True)
 class Notification:
     """A normalised Icinga 2 host or service notification.
@@ -136,6 +162,7 @@ class Notification:
     comment: str | None = None
     duration: int | None = None
     icingaweb_url: str | None = None
+    tags: tuple[Tag, ...] = ()
 
     def __post_init__(self) -> None:
         kind = ObjectKind(self.kind)
@@ -162,6 +189,7 @@ class Notification:
             except ValueError as exc:
                 raise ValidationError(f"Icinga Web: {exc}") from None
             object.__setattr__(self, "icingaweb_url", url)
+        object.__setattr__(self, "tags", normalize_tags(self.tags))
 
         if not self.host.strip():
             raise ValidationError("host name cannot be empty")
