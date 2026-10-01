@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Free-form tags with the repeatable `--tag LABEL=VALUE` option, e.g. to show
   the host location. Tags with an empty value are omitted; malformed tags are
   ignored with a warning and never block a notification.
+- Example Icinga 2 configuration for tags: `vars.imn_tags` in the
+  notification and a generic `ImnTagArguments` function in the commands.
 
 ### Changed
 

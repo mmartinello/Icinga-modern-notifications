@@ -12,6 +12,8 @@ notification model and delivers a clean, readable message:
   (🔴 CRITICAL/DOWN, 🟠 WARNING, 🟣 UNKNOWN, 🟢 RECOVERY);
 - optional information (environment, addresses, notes, comments, Icinga Web
   link, ...) is omitted completely when it is not available;
+- custom tags (location, team, customer, ...) chosen in the Icinga
+  configuration are shown next to the environment;
 - presentation lives in Jinja2 templates that can be customised without
   touching Python code.
 
@@ -24,12 +26,12 @@ notification model and delivers a clean, readable message:
 | --- | --- | --- |
 | ![Service CRITICAL](screenshots/service-critical.png) | ![Service WARNING](screenshots/service-warning.png) | ![Service RECOVERY](screenshots/service-recovery.png) |
 
-| Host DOWN | Service UNKNOWN | Mobile |
+| Host DOWN | Custom tags | Mobile |
 | --- | --- | --- |
-| ![Host DOWN](screenshots/host-down.png) | ![Service UNKNOWN](screenshots/service-unknown.png) | ![Service CRITICAL on mobile](screenshots/service-critical-mobile.png) |
+| ![Host DOWN](screenshots/host-down.png) | ![Service WARNING with many tags](screenshots/service-warning-many-tags.png) | ![Service CRITICAL on mobile](screenshots/service-critical-mobile.png) |
 
-All screenshots are in [`screenshots/`](screenshots/), including host
-recovery, acknowledgement and a notification without optional data. The
+All screenshots are in [`screenshots/`](screenshots/), including UNKNOWN,
+host recovery, acknowledgement and a notification without optional data. The
 matching HTML files are in [`examples/emails/`](examples/emails/) and can be
 regenerated with the current templates:
 
@@ -152,6 +154,7 @@ icinga-modern-notifications mail service --help
 | `--icingaweb-module MODULE` | | `icingadb` (default) or `monitoring`, selects the link format |
 | `--timestamp TIMESTAMP` | | Unix timestamp of the event (default: current time) |
 | `--duration SECONDS` | | event/problem duration in seconds |
+| `--tag LABEL=VALUE` | | custom tag, repeatable without limit (see [Custom tags](#custom-tags)) |
 
 ### Mail options
 
@@ -302,8 +305,66 @@ Main macro mapping:
 | `--environment` | a custom variable, e.g. `$host.vars.imn_environment$` |
 | `--timestamp` | e.g. `$host.last_state_change$` / `$service.last_state_change$` |
 | `--duration` | e.g. `$host.duration_sec$` / `$service.duration_sec$` |
+| `--tag` | generated from `vars.imn_tags`, see [Custom tags](#custom-tags) |
 | `--icingaweb-url`, `--from` | notification custom variables |
 | `--to` | `$user.email$` |
+
+### Custom tags
+
+Tags show site-specific information, such as the location of a host, next
+to the environment: as badges in the email header and as rows in the details
+table (they are not added to the subject). The application only knows the
+generic `--tag LABEL=VALUE` option; which variables to show is decided in the
+Icinga configuration, so nothing is hard-coded and every installation can
+use its own variables.
+
+```bash
+icinga-modern-notifications mail service ... \
+  --tag "Location=DC Milano" --tag "Team=DBA"
+```
+
+- The value is split on the first `=`; tags are shown in the given order and
+  exact duplicates are removed.
+- A tag with an empty value (e.g. an unset variable) is omitted.
+- A malformed tag (no `=` or empty label) is ignored with a warning: tags
+  never prevent a notification from being sent.
+
+**Recommended Icinga setup.** Declare the tags in the notification with
+`vars.imn_tags`, a list of `label` / `var` pairs where `var` is a macro name
+written *without* `$`:
+
+```
+apply Notification "imn-mail-service" to Service {
+  command = "imn-mail-service"
+  ...
+  vars.imn_tags = [
+    { label = "Location", var = "host.vars.location" },
+    { label = "Team", var = "service.vars.team" },
+  ]
+}
+```
+
+The example `NotificationCommand` objects contain a generic function
+(`ImnTagArguments`) that turns this list into `--tag` arguments, resolving
+each variable for the notified host/service and skipping the ones that do
+not exist or are empty. Adding or removing a tag only requires editing
+`vars.imn_tags`. A list is used rather than a dictionary because Icinga
+sorts dictionary keys, while the list keeps the order you choose.
+
+**Alternative without a function.** Add one static argument per tag to the
+`NotificationCommand`; Icinga skips it when the macro cannot be resolved:
+
+```
+"--tag-location" = { key = "--tag", value = "Location=$host.vars.location$" }
+"--tag-team"     = { key = "--tag", value = "Team=$service.vars.team$" }
+```
+
+> **Verify before production:** the `ImnTagArguments` function has not been
+> tested on every Icinga 2 version. Send a custom notification and check the
+> executed command line in the Icinga debug log: hosts with the variable must
+> get the `--tag` argument, hosts without it must get none and no error. If
+> you rely on it, also check that `vars.imn_tags` can be overridden on single
+> hosts or services.
 
 ## Exit codes
 
