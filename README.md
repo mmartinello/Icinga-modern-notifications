@@ -330,16 +330,17 @@ icinga-modern-notifications mail service ... \
   never prevent a notification from being sent.
 
 **Recommended Icinga setup.** Declare the tags in the notification with
-`vars.imn_tags`, a list of `label` / `var` pairs where `var` is a macro name
-written *without* `$`:
+`vars.imn_tags`, a list of `label` / `variable` pairs where `variable` is a
+macro name written *without* `$` (`var` cannot be used as key name: it is a
+reserved word in the Icinga DSL):
 
 ```
 apply Notification "imn-mail-service" to Service {
   command = "imn-mail-service"
   ...
   vars.imn_tags = [
-    { label = "Location", var = "host.vars.location" },
-    { label = "Team", var = "service.vars.team" },
+    { label = "Location", variable = "host.vars.location" },
+    { label = "Team", variable = "service.vars.team" },
   ]
 }
 ```
