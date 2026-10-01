@@ -360,13 +360,6 @@ sorts dictionary keys, while the list keeps the order you choose.
 "--tag-team"     = { key = "--tag", value = "Team=$service.vars.team$" }
 ```
 
-> **Verify before production:** the `ImnTagArguments` function has not been
-> tested on every Icinga 2 version. Send a custom notification and check the
-> executed command line in the Icinga debug log: hosts with the variable must
-> get the `--tag` argument, hosts without it must get none and no error. If
-> you rely on it, also check that `vars.imn_tags` can be overridden on single
-> hosts or services.
-
 ## Exit codes
 
 | Code | Meaning |
