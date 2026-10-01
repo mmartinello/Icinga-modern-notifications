@@ -75,12 +75,16 @@
   <tr>
     <td class="px" bgcolor="{{ color.accent }}" style="background-color:{{ color.accent }}; padding:24px 32px;">
       <div class="status" style="font-family:{{ font }}; font-size:28px; line-height:34px; font-weight:bold; color:#ffffff;">{{ n.emoji }} {{ n.display_status.value }}</div>
-      {#- Problem/Recovery are already clear from the status; show other types (Acknowledgement, Downtime...). -#}
+      {#- Problem/Recovery are already clear from the status; show other types (Acknowledgement, Downtime...).
+          Then the environment badge (bold) followed by one lighter badge per tag (value only). -#}
       {%- set show_type = not (n.is_problem or n.is_recovery) %}
-      {%- if show_type or n.environment %}
-      <div style="font-family:{{ font }}; font-size:14px; line-height:20px; color:#ffffff; padding-top:4px;">
-        {%- if show_type %}{{ n.notification_type_label }}{% if n.environment %} &nbsp;{% endif %}{% endif -%}
-        {%- if n.environment %}<span style="display:inline-block; padding:2px 8px; border:1px solid #ffffff; border-radius:4px; font-weight:bold; font-size:12px; letter-spacing:1px;">{{ n.environment }}</span>{% endif -%}
+      {%- if show_type or n.environment or n.tags %}
+      {%- set sep = joiner("&nbsp; " | safe) %}
+      {%- set badge = "display:inline-block; padding:2px 8px; border:1px solid #ffffff; border-radius:4px; font-size:12px; line-height:18px; margin:2px 0;" %}
+      <div class="badges" style="font-family:{{ font }}; font-size:14px; line-height:26px; color:#ffffff; padding-top:4px;">
+        {%- if show_type %}{{ sep() }}{{ n.notification_type_label }}{% endif -%}
+        {%- if n.environment %}{{ sep() }}<span style="{{ badge }} font-weight:bold; letter-spacing:1px;">{{ n.environment }}</span>{% endif -%}
+        {%- for tag in n.tags %}{{ sep() }}<span title="{{ tag.label }}" style="{{ badge }}">{{ tag.value }}</span>{% endfor -%}
       </div>
       {%- endif %}
     </td>
@@ -129,6 +133,9 @@
         {%- if n.environment %}
         {{ row("Environment", n.environment) }}
         {%- endif %}
+        {%- for tag in n.tags %}
+        {{ row(tag.label, tag.value) }}
+        {%- endfor %}
         {{ row("State", n.state.value) }}
         {%- if n.address %}
         {{ row("Address", n.address) }}

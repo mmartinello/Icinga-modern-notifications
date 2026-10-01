@@ -1,6 +1,6 @@
 {#- Plain-text mail body. Variables: n (Notification), subject, icingaweb_link,
     project_name, version. Optional values are None when absent. -#}
-{{ n.emoji }} {{ n.display_status }}{{ " [" ~ n.environment ~ "]" if n.environment else "" }}
+{{ n.emoji }} {{ n.display_status }}{{ " [" ~ n.environment ~ "]" if n.environment else "" }}{{ " [" ~ n.tags | map(attribute="value") | join("] [") ~ "]" if n.tags else "" }}
 
 {% if n.is_service %}
 {{ n.service_title }} on {{ n.host_title }}
@@ -27,6 +27,9 @@ Service: {{ n.service }}
 {% if n.environment %}
 Environment: {{ n.environment }}
 {% endif %}
+{% for tag in n.tags %}
+{{ tag.label }}: {{ tag.value }}
+{% endfor %}
 State: {{ n.state }}
 {% if n.address %}
 Address: {{ n.address }}

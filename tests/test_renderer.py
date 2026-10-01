@@ -7,7 +7,7 @@ from pathlib import Path
 from icinga_modern_notifications.channels.mail.renderer import MailRenderer
 from icinga_modern_notifications.errors import TemplateError
 from icinga_modern_notifications.icingaweb import object_url
-from icinga_modern_notifications.model import Notification, ObjectKind
+from icinga_modern_notifications.model import Notification, ObjectKind, Tag
 from icinga_modern_notifications.utils import format_timestamp
 
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent
@@ -54,6 +54,9 @@ FULL = dict(
     duration=974,
     icingaweb_url="https://monitoring.example.com/icingaweb2",
 )
+
+
+TAGS = [Tag("Location", "DC Milano"), Tag("Team", "DBA")]
 
 
 class RendererTestCase(unittest.TestCase):
@@ -192,14 +195,49 @@ class HtmlTemplateTests(RendererTestCase):
 
     def test_header_shows_other_notification_types(self):
         html = self.html(service(notification_type="Acknowledgement", environment="PROD"))
-        self.assertIn("Acknowledgement &nbsp;<span", html)
+        self.assertIn("Acknowledgement&nbsp; <span", html)
         html = self.html(service(notification_type="DowntimeStart"))
         self.assertIn("Downtime started", html)
 
-    def test_header_subline_absent_without_type_or_environment(self):
-        html = self.html(service())
-        self.assertNotIn("padding-top:4px;\">\n      </div>", html)
-        self.assertNotIn("padding-top:4px;\"></div>", html)
+    def test_header_subline_absent_without_type_environment_or_tags(self):
+        self.assertNotIn('class="badges"', self.html(service()))
+
+    def test_header_tag_badges_show_values(self):
+        html = self.html(service(environment="PROD", tags=TAGS))
+        self.assertIn(">PROD</span>&nbsp; <span title=\"Location\"", html)
+        self.assertIn('<span title="Location" style=', html)
+        self.assertIn(">DC Milano</span>&nbsp; <span title=\"Team\"", html)
+        self.assertIn(">DBA</span></div>", html)
+
+    def test_header_tags_without_environment(self):
+        html = self.html(service(tags=TAGS))
+        self.assertIn('class="badges"', html)
+        self.assertNotIn("Environment", html)
+        self.assertIn('padding-top:4px;"><span title="Location"', html)
+
+    def test_tags_in_details_table(self):
+        html = self.html(service(environment="PROD", tags=TAGS))
+        environment = html.index(">Environment</td>")
+        location = html.index(">Location</td>")
+        team = html.index(">Team</td>")
+        state = html.index(">State</td>")
+        self.assertLess(environment, location)
+        self.assertLess(location, team)
+        self.assertLess(team, state)
+
+    def test_tags_are_escaped(self):
+        html = self.html(service(tags=[Tag('<b>"L"</b>', "<script>x</script> & y")]))
+        self.assertNotIn("<script>x", html)
+        self.assertNotIn("<b>", html)
+        self.assertIn("&lt;script&gt;x&lt;/script&gt; &amp; y", html)
+        self.assertIn('title="&lt;b&gt;&#34;L&#34;&lt;/b&gt;"', html)
+
+    def test_many_tags(self):
+        tags = [Tag(f"Label{i}", f"value{i}") for i in range(30)]
+        html = self.html(service(tags=tags))
+        for i in range(30):
+            self.assertIn(f">value{i}</span>", html)
+            self.assertIn(f">Label{i}</td>", html)
 
     def test_empty_environment_leaves_no_trace(self):
         html = self.html(service(environment=""))
@@ -263,6 +301,22 @@ class HtmlTemplateTests(RendererTestCase):
         self.assertEqual(mail.subject, "the subject")
         self.assertIn("Output:", mail.text)
         self.assertIn("<title>the subject</title>", mail.html)
+
+
+class TextTagTests(RendererTestCase):
+    def test_tags_in_header_and_details(self):
+        text = self.text(service(environment="PROD", tags=TAGS))
+        self.assertTrue(text.startswith("🔴 CRITICAL [PROD] [DC Milano] [DBA]\n\n"))
+        self.assertIn("Environment: PROD\nLocation: DC Milano\nTeam: DBA\nState: CRITICAL\n", text)
+
+    def test_tags_without_environment(self):
+        text = self.text(service(tags=TAGS))
+        self.assertTrue(text.startswith("🔴 CRITICAL [DC Milano] [DBA]\n\n"))
+
+    def test_no_tags(self):
+        text = self.text(service())
+        self.assertTrue(text.startswith("🔴 CRITICAL\n\n"))
+        self.assertIn("Service: PostgreSQL\nState: CRITICAL\n", text)
 
 
 class TemplateErrorTests(unittest.TestCase):

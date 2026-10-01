@@ -3,7 +3,7 @@
 import unittest
 
 from icinga_modern_notifications.channels.mail.subject import build_subject
-from icinga_modern_notifications.model import Notification, ObjectKind
+from icinga_modern_notifications.model import Notification, ObjectKind, Tag
 
 
 def host(**overrides):
@@ -101,6 +101,12 @@ class ServiceSubjectTests(unittest.TestCase):
     def test_display_names_are_not_used(self):
         n = service(host_display_name="DB primary", service_display_name="Postgres DB")
         self.assertEqual(build_subject(n), "🔴 [ICINGA][CRITICAL] postgres01 / PostgreSQL")
+
+    def test_tags_are_not_in_subject(self):
+        n = service(environment="PROD", tags=[Tag("Location", "DC Milano")])
+        self.assertEqual(
+            build_subject(n), "🔴 [ICINGA][CRITICAL][PROD] postgres01 / PostgreSQL"
+        )
 
     def test_no_line_breaks(self):
         n = service(service="Postgre\nSQL", environment="PR\r\nOD")
