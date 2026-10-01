@@ -16,13 +16,15 @@ from pathlib import Path
 
 from . import PROJECT_NAME, __version__
 from .channels import available_channels
-from .errors import ExitCode, NotificationError
+from .errors import ExitCode, NotificationError, ValidationError
 from .icingaweb import DEFAULT_MODULE, ROUTES
-from .log import add_logging_arguments, configure_logging
-from .model import Notification, ObjectKind, VALID_STATES
+from .log import add_logging_arguments, configure_logging, get_logger
+from .model import Notification, ObjectKind, Tag, VALID_STATES
 from .utils import parse_duration, parse_timestamp
 
 PROG = "icinga-modern-notifications"
+
+log = get_logger("cli")
 
 #: Object kinds that can be notified, with their sub-command help.
 OBJECT_KINDS = {
@@ -117,6 +119,34 @@ def add_notification_arguments(
         type=_argparse_type(parse_duration),
         help="event/problem duration in seconds",
     )
+    optional.add_argument(
+        "--tag",
+        dest="tags",
+        action="append",
+        default=[],
+        metavar="LABEL=VALUE",
+        help="free-form tag shown next to the environment, e.g. 'Location=DC Milano' "
+        "(repeatable; tags with an empty value are omitted)",
+    )
+
+
+def parse_tags(values: Sequence[str]) -> list[Tag]:
+    """Parse ``LABEL=VALUE`` strings, splitting on the first ``=``.
+
+    Tags are decorative: a malformed tag is logged and skipped so that it can
+    never prevent an alert from being delivered.
+    """
+    tags = []
+    for value in values:
+        label, separator, tag_value = value.partition("=")
+        try:
+            if not separator:
+                raise ValidationError("missing '='")
+            tags.append(Tag(label, tag_value))
+        except ValidationError as exc:
+            shown = value if len(value) <= 80 else value[:77] + "..."
+            log.warning("ignoring malformed tag %r (expected LABEL=VALUE): %s", shown, exc)
+    return tags
 
 
 def build_parser(template_dir: Path | None = None) -> argparse.ArgumentParser:
@@ -174,6 +204,7 @@ def notification_from_args(args: argparse.Namespace) -> Notification:
         comment=args.comment,
         duration=args.duration,
         icingaweb_url=args.icingaweb_url,
+        tags=tuple(parse_tags(args.tags)),
     )
 
 

@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Example emails for every status (`examples/emails/`, regenerated with
   `examples/render_examples.py`) and PNG screenshots in `screenshots/`.
+- Free-form tags with the repeatable `--tag LABEL=VALUE` option, e.g. to show
+  the host location. Tags with an empty value are omitted; malformed tags are
+  ignored with a warning and never block a notification.
 
 ### Changed
 

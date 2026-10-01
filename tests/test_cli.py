@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from icinga_modern_notifications.cli import build_parser, notification_from_args
-from icinga_modern_notifications.model import DisplayStatus, ObjectKind, State
+from icinga_modern_notifications.model import DisplayStatus, ObjectKind, State, Tag
 
 from .helpers import HOST_ARGS, SERVICE_ARGS, run_cli
 
@@ -191,6 +191,60 @@ class OptionalArgumentTests(unittest.TestCase):
         self.assertIsNone(n.environment)
         self.assertIsNone(n.duration)
         self.assertIsNone(n.icingaweb_url)
+
+
+class TagArgumentTests(unittest.TestCase):
+    def test_no_tags(self):
+        _, n = parse(SERVICE_ARGS)
+        self.assertEqual(n.tags, ())
+
+    def test_repeatable_tags(self):
+        _, n = parse(SERVICE_ARGS + [
+            "--tag", "Location=DC Milano",
+            "--tag", "Team=DBA",
+            "--tag", "Customer=ACME",
+        ])
+        self.assertEqual(
+            n.tags,
+            (Tag("Location", "DC Milano"), Tag("Team", "DBA"), Tag("Customer", "ACME")),
+        )
+
+    def test_split_on_first_equal_sign(self):
+        _, n = parse(SERVICE_ARGS + ["--tag", "Query=a=b"])
+        self.assertEqual(n.tags, (Tag("Query", "a=b"),))
+
+    def test_empty_value_is_silently_omitted(self):
+        with self.assertNoLogs("icinga_modern_notifications", level="WARNING"):
+            _, n = parse(SERVICE_ARGS + ["--tag", "Location=", "--tag", "Team=  "])
+        self.assertEqual(n.tags, ())
+
+    def test_malformed_tags_are_ignored_with_warning(self):
+        argv = SERVICE_ARGS + ["--tag", "DC Milano", "--tag", "=DBA", "--tag", "Rack=B4"]
+        with self.assertLogs("icinga_modern_notifications.cli", level="WARNING") as logs:
+            _, n = parse(argv)
+        self.assertEqual(n.tags, (Tag("Rack", "B4"),))
+        self.assertEqual(len(logs.records), 2)
+        self.assertIn("ignoring malformed tag 'DC Milano'", logs.output[0])
+        self.assertIn("ignoring malformed tag '=DBA'", logs.output[1])
+
+    def test_long_malformed_tag_is_truncated_in_log(self):
+        with self.assertLogs("icinga_modern_notifications.cli", level="WARNING") as logs:
+            parse(SERVICE_ARGS + ["--tag", "x" * 500])
+        self.assertLess(len(logs.output[0]), 200)
+
+    def test_malformed_tag_does_not_block_notification(self):
+        code, out, err = run_cli(*SERVICE_ARGS, "--tag", "broken", "--dry-run")
+        self.assertEqual(code, 0)
+        self.assertIn("multipart/alternative", out)
+        self.assertIn("warning: ignoring malformed tag 'broken'", err)
+
+    def test_tags_on_host_notifications(self):
+        _, n = parse(HOST_ARGS + ["--tag", "Location=DC Milano"])
+        self.assertEqual(n.tags, (Tag("Location", "DC Milano"),))
+
+    def test_help_mentions_tag(self):
+        _, out, _ = run_cli("mail", "service", "--help")
+        self.assertIn("--tag LABEL=VALUE", out)
 
 
 class ValidationTests(unittest.TestCase):
