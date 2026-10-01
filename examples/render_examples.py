@@ -23,10 +23,11 @@ sys.path.insert(0, str(REPO))
 from icinga_modern_notifications.channels.mail.renderer import MailRenderer  # noqa: E402
 from icinga_modern_notifications.channels.mail.subject import build_subject  # noqa: E402
 from icinga_modern_notifications.icingaweb import object_url  # noqa: E402
-from icinga_modern_notifications.model import Notification, ObjectKind  # noqa: E402
+from icinga_modern_notifications.model import Notification, ObjectKind, Tag  # noqa: E402
 
 TIMESTAMP = 1790603551  # 28/09/2026 15:52:31 Europe/Rome
 ICINGAWEB = "https://monitoring.example.com/icingaweb2"
+LOCATION = Tag("Location", "DC Milano")
 
 SERVICE = dict(
     kind=ObjectKind.SERVICE,
@@ -65,6 +66,7 @@ SCENARIOS: dict[str, tuple[str, Notification]] = {
             "TCP/IP connections?",
             notes="Main PostgreSQL database for the ERP.\nOn-call DBA: +39 000 0000000",
             duration=974,
+            tags=(LOCATION, Tag("Team", "DBA")),
         ),
     ),
     "service-warning": (
@@ -118,6 +120,7 @@ SCENARIOS: dict[str, tuple[str, Notification]] = {
             output="PING CRITICAL - Packet loss = 100%",
             notes="Physical server in rack B4.",
             duration=187200,
+            tags=(LOCATION,),
         ),
     ),
     "host-recovery": (
@@ -128,6 +131,25 @@ SCENARIOS: dict[str, tuple[str, Notification]] = {
             state="UP",
             output="PING OK - Packet loss = 0%, RTA = 0.42 ms",
             duration=12420,
+            tags=(LOCATION,),
+        ),
+    ),
+    "service-warning-many-tags": (
+        "Service WARNING with many tags",
+        Notification(
+            **{**SERVICE, "service": "erp-api", "service_display_name": "ERP API latency"},
+            notification_type="Problem",
+            state="WARNING",
+            output="HTTP WARNING - response time 2.8 s (warning at 2 s)",
+            duration=640,
+            tags=(
+                LOCATION,
+                Tag("Team", "Applications"),
+                Tag("Customer", "ACME S.p.A."),
+                Tag("Service level", "Gold 24x7"),
+                Tag("Cluster", "erp-prod-a"),
+                Tag("Owner", "m.rossi"),
+            ),
         ),
     ),
     "service-critical-minimal": (
